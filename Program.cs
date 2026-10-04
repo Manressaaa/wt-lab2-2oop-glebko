@@ -11,7 +11,6 @@ namespace wt_lab2_2oop_glebko
 {
     class Program
     {
-        // ВАЖНО: Main стал async Task, чтобы можно было использовать await
         static async Task Main(string[] args)
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
@@ -32,7 +31,7 @@ namespace wt_lab2_2oop_glebko
 
                 if (choice == "1") RunBlock1();
                 else if (choice == "2") RunBlock2();
-                else if (choice == "3") await RunBlock3();   // await!
+                else if (choice == "3") await RunBlock3();
                 else if (choice == "0") break;
                 else Console.WriteLine("Неверный ввод, попробуйте еще раз.");
             }
@@ -187,20 +186,23 @@ namespace wt_lab2_2oop_glebko
         {
             Console.WriteLine("\n--- ВЫПОЛНЕНИЕ БЛОКА 3 ---");
 
-            // === УРОВЕНЬ 1: простой async Task ===
-            Console.WriteLine("\n[Уровень 1] Простой async Task с await Task.Delay:");
+            // === УРОВЕНЬ 1 ===
+            Console.WriteLine("\n[Уровень 1] Асинхронный метод с Task.Delay(1000):");
+            Console.WriteLine("  Начало обработки рейсов...");
             await ProcessFlightsAsync();
+            Console.WriteLine("  Продолжение работы после await");
 
-            // === УРОВЕНЬ 2: async Task<List<T>> + try-catch-finally ===
+            // === УРОВЕНЬ 2 ===
             Console.WriteLine("\n[Уровень 2] Загрузка списка рейсов (async Task<List<Flight>>):");
             var loaded = await LoadFlightsAsync();
             foreach (var f in loaded)
                 f.PrintInfo();
 
-            // === УРОВЕНЬ 3: Task.WhenAll + CancellationToken ===
-            Console.WriteLine("\n[Уровень 3] Параллельные задачи через Task.WhenAll:");
+            // === УРОВЕНЬ 3: Task.WhenAll ===
+            Console.WriteLine("\n[Уровень 3] Параллельное выполнение через Task.WhenAll:");
             await RunParallelTasksAsync();
 
+            // === УРОВЕНЬ 3: CancellationToken ===
             Console.WriteLine("\n[Уровень 3] Отмена задачи через CancellationToken:");
             await RunCancellationDemoAsync();
         }
@@ -208,9 +210,9 @@ namespace wt_lab2_2oop_glebko
         // ---------- УРОВЕНЬ 1 ----------
         static async Task ProcessFlightsAsync()
         {
-            Console.WriteLine("  Начало обработки рейсов...");
-            await Task.Delay(1000);   // имитация долгой работы
-            Console.WriteLine("  Обработка завершена (прошло 1 сек)");
+            Console.WriteLine("  [внутри] обработка началась");
+            await Task.Delay(1000);
+            Console.WriteLine("  [внутри] обработка завершена");
         }
 
         // ---------- УРОВЕНЬ 2 ----------
@@ -219,7 +221,7 @@ namespace wt_lab2_2oop_glebko
             try
             {
                 Console.WriteLine("  Загрузка рейсов из внешнего API...");
-                await Task.Delay(1500);   // имитация запроса к API
+                await Task.Delay(1500);
 
                 return new List<Flight>
                 {
@@ -272,7 +274,7 @@ namespace wt_lab2_2oop_glebko
         {
             using var cts = new CancellationTokenSource();
 
-            // Автоматически отменить задачу через 500 мс
+            // Автоматическая отмена через 500 мс
             cts.CancelAfter(500);
 
             try
